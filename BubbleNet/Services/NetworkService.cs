@@ -123,16 +123,31 @@ namespace BubbleNet.Services
             {
                 try
                 {
-                    var client = await _listener.AcceptTcpClientAsync(ct);
+                    // Register cancellation to stop accepting
+                    using var registration = ct.Register(() => _listener?.Stop());
+                    var client = await _listener.AcceptTcpClientAsync();
+                    if (ct.IsCancellationRequested)
+                    {
+                        client.Close();
+                        break;
+                    }
                     _ = HandleClientAsync(client, ct);
                 }
-                catch (OperationCanceledException)
+                catch (ObjectDisposedException)
+                {
+                    // Listener was stopped
+                    break;
+                }
+                catch (SocketException) when (ct.IsCancellationRequested)
                 {
                     break;
                 }
                 catch (Exception ex)
                 {
-                    ErrorOccurred?.Invoke(this, $"Accept error: {ex.Message}");
+                    if (!ct.IsCancellationRequested)
+                    {
+                        ErrorOccurred?.Invoke(this, $"Accept error: {ex.Message}");
+                    }
                 }
             }
         }
@@ -201,12 +216,13 @@ namespace BubbleNet.Services
         {
             try
             {
-                var octets = FoodWords.ParseWordCode(targetWordCode);
-                if (octets.octet2 == 0 || octets.octet3 == 0 || octets.octet4 == 0)
+                if (!FoodWords.IsValidWordCode(targetWordCode))
                 {
-                    ErrorOccurred?.Invoke(this, "Invalid word code");
+                    ErrorOccurred?.Invoke(this, "Invalid word code - please check the format (Word1/Word2/Word3)");
                     return false;
                 }
+                
+                var octets = FoodWords.ParseWordCode(targetWordCode);
 
                 // Get local IP prefix
                 var localParts = LocalIP.Split('.');

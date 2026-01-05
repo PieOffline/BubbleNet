@@ -273,7 +273,7 @@ namespace BubbleNet.Models
         }
 
         /// <summary>
-        /// Get the IP octet value for a food word (1-255), returns 0 if not found
+        /// Get the IP octet value for a food word (1-255), returns -1 if not found
         /// </summary>
         public static int GetOctet(string word)
         {
@@ -282,16 +282,17 @@ namespace BubbleNet.Models
                 if (Words[i].Equals(word, System.StringComparison.OrdinalIgnoreCase))
                     return i + 1;
             }
-            return 0;
+            return -1;  // Return -1 for invalid words (not found)
         }
 
         /// <summary>
         /// Generate a word code from the last 3 octets of an IP address
         /// Format: Word1/Word2/Word3
+        /// Note: Since we only have words for 1-255, octet 0 maps to word index 1 (Apple)
         /// </summary>
         public static string GenerateWordCode(byte octet2, byte octet3, byte octet4)
         {
-            // Handle 0 values by treating them as 1 (minimum valid octet)
+            // Handle 0 values by treating them as 1 (minimum valid word index)
             int o2 = octet2 == 0 ? 1 : octet2;
             int o3 = octet3 == 0 ? 1 : octet3;
             int o4 = octet4 == 0 ? 1 : octet4;
@@ -301,15 +302,24 @@ namespace BubbleNet.Models
 
         /// <summary>
         /// Parse a word code back to IP octets
-        /// Returns tuple of (octet2, octet3, octet4)
+        /// Returns tuple of (octet2, octet3, octet4), returns (-1, -1, -1) if invalid
         /// </summary>
         public static (int octet2, int octet3, int octet4) ParseWordCode(string wordCode)
         {
             var parts = wordCode.Split('/');
             if (parts.Length != 3)
-                return (0, 0, 0);
+                return (-1, -1, -1);
 
             return (GetOctet(parts[0].Trim()), GetOctet(parts[1].Trim()), GetOctet(parts[2].Trim()));
+        }
+
+        /// <summary>
+        /// Check if a word code is valid
+        /// </summary>
+        public static bool IsValidWordCode(string wordCode)
+        {
+            var octets = ParseWordCode(wordCode);
+            return octets.octet2 > 0 && octets.octet3 > 0 && octets.octet4 > 0;
         }
     }
 }

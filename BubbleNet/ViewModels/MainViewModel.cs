@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -17,6 +18,11 @@ namespace BubbleNet.ViewModels
     {
         private readonly NetworkService _networkService;
         private readonly SoundService _soundService;
+        
+        // URL validation pattern - allows http, https, and common safe protocols
+        private static readonly Regex SafeUrlPattern = new(
+            @"^https?://[a-zA-Z0-9][-a-zA-Z0-9]*(\.[a-zA-Z0-9][-a-zA-Z0-9]*)+(:[0-9]+)?(/.*)?$",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -201,16 +207,48 @@ namespace BubbleNet.ViewModels
                 NotificationMessage = $"📥 Received {item.Type} from {item.SenderWordCode}";
                 _soundService.PlayReceive();
 
-                // Auto-open links if enabled
+                // Auto-open links if enabled - only for validated URLs
                 if (AutoOpen && item.Type == TransferType.Link && !string.IsNullOrWhiteSpace(item.Content))
                 {
-                    try
+                    if (IsValidAndSafeUrl(item.Content))
                     {
-                        Process.Start(new ProcessStartInfo(item.Content) { UseShellExecute = true });
+                        try
+                        {
+                            Process.Start(new ProcessStartInfo(item.Content) { UseShellExecute = true });
+                        }
+                        catch { }
                     }
-                    catch { }
+                    else
+                    {
+                        NotificationMessage = $"⚠️ Auto-open skipped: URL did not pass validation";
+                    }
                 }
             });
+        }
+
+        /// <summary>
+        /// Validates that a URL is safe to open (http/https only, proper format)
+        /// </summary>
+        private static bool IsValidAndSafeUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+                return false;
+
+            // Must be http or https
+            if (!url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+                !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            // Validate URL format using Uri.TryCreate
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+                return false;
+
+            // Only allow http and https schemes
+            if (uri.Scheme != "http" && uri.Scheme != "https")
+                return false;
+
+            // Additional validation with regex pattern
+            return SafeUrlPattern.IsMatch(url);
         }
 
         private async Task SendFileAsync()
@@ -272,10 +310,22 @@ namespace BubbleNet.ViewModels
 
         private async Task SendLinkAsync()
         {
-            var url = LinkToSend;
-            if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+            var url = LinkToSend.Trim();
+            
+            // Add https:// prefix if no protocol specified
+            if (!url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && 
+                !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
             {
                 url = "https://" + url;
+            }
+
+            // Validate URL before sending
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || 
+                (uri.Scheme != "http" && uri.Scheme != "https"))
+            {
+                NotificationMessage = "⚠️ Invalid URL format. Please enter a valid http or https URL.";
+                _soundService.PlayError();
+                return;
             }
 
             var item = new TransferItem
@@ -355,7 +405,17 @@ namespace BubbleNet.ViewModels
                     case TransferType.Link:
                         if (!string.IsNullOrWhiteSpace(item.Content))
                         {
-                            Process.Start(new ProcessStartInfo(item.Content) { UseShellExecute = true });
+                            // Validate URL before opening
+                            if (IsValidAndSafeUrl(item.Content))
+                            {
+                                Process.Start(new ProcessStartInfo(item.Content) { UseShellExecute = true });
+                            }
+                            else
+                            {
+                                NotificationMessage = "⚠️ Cannot open: URL did not pass security validation";
+                                _soundService.PlayError();
+                                return;
+                            }
                         }
                         break;
                     case TransferType.File:

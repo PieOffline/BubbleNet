@@ -44,7 +44,7 @@
         <Grid Grid.Row="1">
             <!-- Start Screen (Not Connected) -->
             <Border Style="{StaticResource Card}" 
-                    Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Inverse}"
+                    Visibility="{Binding IsConnected, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
                 <StackPanel HorizontalAlignment="Center">
                     <TextBlock Text="🫧" FontSize="72" HorizontalAlignment="Center" Margin="0,0,0,20"/>
