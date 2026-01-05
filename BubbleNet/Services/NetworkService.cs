@@ -224,11 +224,16 @@ namespace BubbleNet.Services
                 
                 var octets = FoodWords.ParseWordCode(targetWordCode);
 
-                // Get local IP prefix
+                // Get local IP parts
                 var localParts = LocalIP.Split('.');
                 if (localParts.Length != 4) return false;
 
-                var targetIP = $"{localParts[0]}.{octets.octet2}.{octets.octet3}.{octets.octet4}";
+                // If ParseWordCode returned -1 for an octet, fill it from local IP
+                int o2 = octets.octet2 > 0 ? octets.octet2 : int.Parse(localParts[1]);
+                int o3 = octets.octet3 > 0 ? octets.octet3 : int.Parse(localParts[2]);
+                int o4 = octets.octet4 > 0 ? octets.octet4 : int.Parse(localParts[3]);
+
+                var targetIP = $"{localParts[0]}.{o2}.{o3}.{o4}";
                 
                 // Try both ports
                 foreach (var port in new[] { DEFAULT_PORT, ALT_PORT })

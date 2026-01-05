@@ -9,6 +9,13 @@
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource PrimaryBackgroundBrush}">
 
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <converters:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
+    </Window.Resources>
+
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
@@ -233,7 +240,7 @@
                                                                    Foreground="{StaticResource PrimaryTextBrush}"
                                                                    TextTrimming="CharacterEllipsis" MaxWidth="300"/>
                                                         <TextBlock FontSize="11" Foreground="{StaticResource SecondaryTextBrush}">
-                                                            <Run Text="{Binding Type}"/> • <Run Text="{Binding TimeDisplay}"/>
+                                                            <Run Text="{Binding Type}"/> • <Run Text="{Binding TimeDisplay, Mode=OneWay}"/>
                                                         </TextBlock>
                                                     </StackPanel>
                                                 </StackPanel>
@@ -282,10 +289,5 @@
         </Grid>
     </Grid>
 
-    <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
-        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
-        <converters:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
-    </Window.Resources>
+    
 </Window>

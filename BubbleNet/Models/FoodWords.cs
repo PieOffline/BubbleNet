@@ -304,13 +304,48 @@ namespace BubbleNet.Models
         /// Parse a word code back to IP octets
         /// Returns tuple of (octet2, octet3, octet4), returns (-1, -1, -1) if invalid
         /// </summary>
+        /// <summary>
+        /// Parse a word code back to IP octets
+        /// Accepts 1-3 segments separated by '/' or '.'; segments map to the last octets.
+        /// Examples:
+        ///   "Apple" => ( -1, -1, 1 )  (only octet4 specified)
+        ///   "4.Apple" => ( -1, 4, 1 )
+        ///   "3.4.Apple" => ( 3, 4, 1 )
+        /// Returns tuple of (octet2, octet3, octet4). A value of -1 means that octet was not specified.
+        /// Returns (-1,-1,-1) for invalid input or unknown words.
+        /// </summary>
         public static (int octet2, int octet3, int octet4) ParseWordCode(string wordCode)
         {
-            var parts = wordCode.Split('/');
-            if (parts.Length != 3)
+            if (string.IsNullOrWhiteSpace(wordCode))
                 return (-1, -1, -1);
 
-            return (GetOctet(parts[0].Trim()), GetOctet(parts[1].Trim()), GetOctet(parts[2].Trim()));
+            var parts = wordCode.Split(new[] { '/', '.' }, System.StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length < 1 || parts.Length > 3)
+                return (-1, -1, -1);
+
+            // Align parts to the last octets
+            int[] result = new int[] { -1, -1, -1 };
+            int offset = 3 - parts.Length; // where to start filling
+            for (int i = 0; i < parts.Length; i++)
+            {
+                var token = parts[i].Trim();
+                if (string.IsNullOrEmpty(token)) return (-1, -1, -1);
+
+                // Try numeric first
+                if (int.TryParse(token, out var numeric))
+                {
+                    if (numeric < 0 || numeric > 255) return (-1, -1, -1);
+                    result[offset + i] = numeric;
+                }
+                else
+                {
+                    var oct = GetOctet(token);
+                    if (oct == -1) return (-1, -1, -1);
+                    result[offset + i] = oct;
+                }
+            }
+
+            return (result[0], result[1], result[2]);
         }
 
         /// <summary>
@@ -319,7 +354,8 @@ namespace BubbleNet.Models
         public static bool IsValidWordCode(string wordCode)
         {
             var octets = ParseWordCode(wordCode);
-            return octets.octet2 > 0 && octets.octet3 > 0 && octets.octet4 > 0;
+            // At least one octet must be specified (i.e., > 0). Unspecified octets are -1.
+            return (octets.octet2 > 0) || (octets.octet3 > 0) || (octets.octet4 > 0);
         }
     }
 }
