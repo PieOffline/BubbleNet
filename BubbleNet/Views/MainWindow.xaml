@@ -1,0 +1,291 @@
+<Window x:Class="BubbleNet.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:BubbleNet.ViewModels"
+        xmlns:converters="clr-namespace:BubbleNet.Converters"
+        Title="BubbleNet - QuickShare" 
+        Height="800" Width="1200"
+        MinHeight="600" MinWidth="900"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource PrimaryBackgroundBrush}">
+
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Notification Banner -->
+        <Border Grid.Row="0" Style="{StaticResource NotificationBanner}" Margin="0,0,0,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding NotificationMessage}" 
+                           Foreground="{StaticResource PrimaryTextBrush}" 
+                           FontSize="14" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding ConnectionStatus}" 
+                               Foreground="{StaticResource SecondaryTextBrush}" 
+                               FontSize="13" Margin="0,0,15,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding PortDisplay}" 
+                               Foreground="{StaticResource SecondaryTextBrush}" 
+                               FontSize="13" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <!-- Start Screen (Not Connected) -->
+            <Border Style="{StaticResource Card}" 
+                    Visibility="{Binding IsConnected, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="🫧" FontSize="72" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                    <TextBlock Text="BubbleNet" FontSize="36" FontWeight="Bold" 
+                               Foreground="{StaticResource PrimaryTextBrush}" 
+                               HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                    <TextBlock Text="Share files, links, and more across your local network" 
+                               FontSize="16" Foreground="{StaticResource SecondaryTextBrush}" 
+                               HorizontalAlignment="Center" Margin="0,0,0,40"/>
+                    <Button Content="🔌 Mesh Me" Style="{StaticResource BigBlueButton}" 
+                            Command="{Binding MeshMeCommand}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Opens port 16741 or 6741 for local connections" 
+                               FontSize="12" Foreground="{StaticResource SecondaryTextBrush}" 
+                               HorizontalAlignment="Center" Margin="0,20,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Connected View -->
+            <Grid Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Side: Send Section -->
+                <Border Grid.Column="0" Style="{StaticResource Card}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Send Header -->
+                        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                            <TextBlock Text="📤 Send" FontSize="24" FontWeight="Bold" 
+                                       Foreground="{StaticResource PrimaryTextBrush}" Margin="0,0,0,5"/>
+                            <TextBlock Text="Share files, text, links, or screenshots" 
+                                       FontSize="13" Foreground="{StaticResource SecondaryTextBrush}"/>
+                        </StackPanel>
+
+                        <!-- Your Word Code -->
+                        <Border Grid.Row="1" Background="{StaticResource TertiaryBackgroundBrush}" 
+                                CornerRadius="8" Padding="15" Margin="0,0,0,20">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Your Word Code" FontSize="12" 
+                                               Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                                    <TextBlock Text="{Binding WordCode}" FontSize="20" FontWeight="SemiBold" 
+                                               Foreground="{StaticResource AccentBrush}"/>
+                                    <TextBlock Text="{Binding LocalIP, StringFormat='IP: {0}'}" FontSize="11" 
+                                               Foreground="{StaticResource SecondaryTextBrush}" Margin="0,5,0,0"/>
+                                </StackPanel>
+                                <Button Grid.Column="1" Content="📋 Copy" Style="{StaticResource SecondaryButton}" 
+                                        Command="{Binding CopyWordCodeCommand}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Send Options -->
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <!-- Target Word Code Input -->
+                                <TextBlock Text="Recipient Word Code" FontSize="13" 
+                                           Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,8"/>
+                                <TextBox Style="{StaticResource DarkTextBox}" 
+                                         Text="{Binding TargetWordCode, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,0,0,20"/>
+
+                                <!-- Send File -->
+                                <Button Content="📁 Send File" Style="{StaticResource PrimaryButton}" 
+                                        Command="{Binding SendFileCommand}" 
+                                        HorizontalAlignment="Stretch" Margin="0,0,0,10"/>
+
+                                <!-- Send Screenshot -->
+                                <Button Content="📸 Send Screenshot" Style="{StaticResource SecondaryButton}" 
+                                        Command="{Binding SendScreenshotCommand}" 
+                                        HorizontalAlignment="Stretch" Margin="0,0,0,20"/>
+
+                                <!-- Send Text -->
+                                <TextBlock Text="Send Text" FontSize="13" 
+                                           Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,8"/>
+                                <TextBox Style="{StaticResource DarkTextBox}" 
+                                         Text="{Binding TextToSend, UpdateSourceTrigger=PropertyChanged}"
+                                         TextWrapping="Wrap" AcceptsReturn="True" Height="80"
+                                         Margin="0,0,0,8"/>
+                                <Button Content="📝 Send Text" Style="{StaticResource SecondaryButton}" 
+                                        Command="{Binding SendTextCommand}" 
+                                        HorizontalAlignment="Stretch" Margin="0,0,0,20"/>
+
+                                <!-- Send Link -->
+                                <TextBlock Text="Send Link" FontSize="13" 
+                                           Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,8"/>
+                                <TextBox Style="{StaticResource DarkTextBox}" 
+                                         Text="{Binding LinkToSend, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,0,0,8"/>
+                                <Button Content="🔗 Send Link" Style="{StaticResource SecondaryButton}" 
+                                        Command="{Binding SendLinkCommand}" 
+                                        HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <!-- Disconnect Button -->
+                        <Button Grid.Row="3" Content="❌ Disconnect" Style="{StaticResource SecondaryButton}" 
+                                Command="{Binding DisconnectCommand}" 
+                                HorizontalAlignment="Left" Margin="0,20,0,0"/>
+                    </Grid>
+                </Border>
+
+                <!-- Right Side: Receive Section -->
+                <Border Grid.Column="2" Style="{StaticResource Card}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Receive Header -->
+                        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                            <TextBlock Text="📥 Received" FontSize="24" FontWeight="Bold" 
+                                       Foreground="{StaticResource PrimaryTextBrush}" Margin="0,0,0,5"/>
+                            <TextBlock Text="View and manage incoming transfers" 
+                                       FontSize="13" Foreground="{StaticResource SecondaryTextBrush}"/>
+                        </StackPanel>
+
+                        <!-- Toggles -->
+                        <Border Grid.Row="1" Background="{StaticResource TertiaryBackgroundBrush}" 
+                                CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- Auto Deny Toggle -->
+                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                    <ToggleButton Style="{StaticResource ToggleSwitch}" 
+                                                  IsChecked="{Binding AutoDeny}" Margin="0,0,10,0"/>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="Auto-Deny" FontSize="13" 
+                                                   Foreground="{StaticResource PrimaryTextBrush}"/>
+                                        <TextBlock Text="Block all incoming" FontSize="10" 
+                                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Auto Open Toggle -->
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <ToggleButton Style="{StaticResource ToggleSwitch}" 
+                                                  IsChecked="{Binding AutoOpen}" Margin="0,0,10,0"/>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="Auto-Open" FontSize="13" 
+                                                   Foreground="{StaticResource PrimaryTextBrush}"/>
+                                        <TextBlock Text="Open links in browser" FontSize="10" 
+                                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Received Items List -->
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding ReceivedItems}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource ReceivedItemCard}">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+
+                                                <!-- Item Header -->
+                                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+                                                    <TextBlock Text="{Binding TypeIcon}" FontSize="20" 
+                                                               VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding DisplayInfo}" FontSize="14" 
+                                                                   Foreground="{StaticResource PrimaryTextBrush}"
+                                                                   TextTrimming="CharacterEllipsis" MaxWidth="300"/>
+                                                        <TextBlock FontSize="11" Foreground="{StaticResource SecondaryTextBrush}">
+                                                            <Run Text="{Binding Type}"/> • <Run Text="{Binding TimeDisplay}"/>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <!-- Action Buttons -->
+                                                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,8">
+                                                    <Button Content="Open" Style="{StaticResource SecondaryButton}" 
+                                                            Command="{Binding DataContext.OpenItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                            CommandParameter="{Binding}" Padding="10,6" Margin="0,0,5,0"/>
+                                                    <Button Content="Copy" Style="{StaticResource SecondaryButton}" 
+                                                            Command="{Binding DataContext.CopyItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                            CommandParameter="{Binding}" Padding="10,6" Margin="0,0,5,0"/>
+                                                    <Button Content="Download" Style="{StaticResource SecondaryButton}" 
+                                                            Command="{Binding DataContext.DownloadItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                            CommandParameter="{Binding}" Padding="10,6"
+                                                            Visibility="{Binding FileData, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                                </StackPanel>
+
+                                                <!-- Sender Info -->
+                                                <StackPanel Grid.Row="2" Orientation="Horizontal">
+                                                    <TextBlock Text="From: " FontSize="11" 
+                                                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding SenderWordCode}" FontSize="11" 
+                                                               Foreground="{StaticResource AccentBrush}" Margin="0,0,15,0"/>
+                                                    <TextBlock Text="{Binding DateDisplay}" FontSize="11" 
+                                                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                        <!-- Empty State -->
+                        <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    Visibility="{Binding ReceivedItems.Count, Converter={StaticResource ZeroToVisibilityConverter}}">
+                            <TextBlock Text="📭" FontSize="48" HorizontalAlignment="Center" Opacity="0.5"/>
+                            <TextBlock Text="No items received yet" FontSize="14" 
+                                       Foreground="{StaticResource SecondaryTextBrush}" 
+                                       HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <converters:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
+    </Window.Resources>
+</Window>
