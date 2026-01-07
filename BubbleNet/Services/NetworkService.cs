@@ -77,14 +77,14 @@ namespace BubbleNet.Services
             return FoodWords.GenerateWordCode(octets.octet2, octets.octet3, octets.octet4);
         }
 
-        public async Task<bool> StartListeningAsync()
+        public Task<bool> StartListeningAsync()
         {
-            if (_isRunning) return true;
+            if (_isRunning) return Task.FromResult(true);
 
             _cts = new CancellationTokenSource();
 
             // Try default port first, then alternative
-            foreach (var port in new[] { DEFAULT_PORT, ALT_PORT })
+            foreach (var port in new[] { ALT_PORT, DEFAULT_PORT })
             {
                 try
                 {
@@ -95,7 +95,7 @@ namespace BubbleNet.Services
                     StatusChanged?.Invoke(this, $"Listening on port {port}");
                     
                     _ = AcceptConnectionsAsync(_cts.Token);
-                    return true;
+                    return Task.FromResult(true);
                 }
                 catch (SocketException)
                 {
@@ -105,7 +105,7 @@ namespace BubbleNet.Services
             }
 
             ErrorOccurred?.Invoke(this, "Failed to open ports 16741 or 6741");
-            return false;
+            return Task.FromResult(false);
         }
 
         public void StopListening()
