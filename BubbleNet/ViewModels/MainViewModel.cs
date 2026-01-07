@@ -80,7 +80,7 @@ namespace BubbleNet.ViewModels
             }
         }
 
-        private bool _autoOpen;
+        private bool _autoOpen = true;
         public bool AutoOpen
         {
             get => _autoOpen;
