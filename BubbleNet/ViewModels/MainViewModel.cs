@@ -177,6 +177,7 @@ namespace BubbleNet.ViewModels
                 LocalIP = _networkService.LocalIP;
                 WordCode = _networkService.GetWordCode();
                 ActivePort = _networkService.ActivePort;
+                int idx = WordCode?.LastIndexOf(’.’) ?? -1;EndOfWordCode = idx >= 0 ? WordCode.Substring(idx + 1) : (WordCode ?? string.Empty);
                 NotificationMessage = $"✅ Connected! Share your word code: {WordCode}";
                 _soundService.PlayConnect();
             }
