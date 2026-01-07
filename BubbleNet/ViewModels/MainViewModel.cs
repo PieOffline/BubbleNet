@@ -177,12 +177,7 @@ namespace BubbleNet.ViewModels
                 LocalIP = _networkService.LocalIP;
                 WordCode = _networkService.GetWordCode();
                 ActivePort = _networkService.ActivePort;
-                EndOfWordCode = WordCode?
-                    .Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries)
-                    .LastOrDefault()?
-                    .Trim() ?? string.Empty;
-
-                NotificationMessage = $"✅ Connected! Share your word code: {EndOfWordCode}";
+                NotificationMessage = $"✅ Connected! Share your word code: {WordCode.Substring(WordCode.LastIndexOf('/') + 1)}";
                 _soundService.PlayConnect();
             }
         }
@@ -256,6 +251,41 @@ namespace BubbleNet.ViewModels
             return SafeUrlPattern.IsMatch(url);
         }
 
+        /// <summary>
+        /// Convert a user-entered target word code (may be partial like "Apple" or "4.Apple")
+        /// into the full canonical word code format "Word1/Word2/Word3" by filling
+        /// missing octets from the local IP octets.
+        /// Returns empty string if input is invalid or local IP is unavailable.
+        /// </summary>
+        private string ConvertToWordCode(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+
+            var parsed = FoodWords.ParseWordCode(input.Trim());
+            if (parsed.octet2 == -1 && parsed.octet3 == -1 && parsed.octet4 == -1)
+                return string.Empty;
+
+            try
+            {
+                var local = _networkService.GetIPOctets();
+
+                int o2 = parsed.octet2 > 0 ? parsed.octet2 : local.octet2;
+                int o3 = parsed.octet3 > 0 ? parsed.octet3 : local.octet3;
+                int o4 = parsed.octet4 > 0 ? parsed.octet4 : local.octet4;
+
+                // Ensure values are within 1-255
+                o2 = (o2 < 1) ? 1 : (o2 > 255 ? 255 : o2);
+                o3 = (o3 < 1) ? 1 : (o3 > 255 ? 255 : o3);
+                o4 = (o4 < 1) ? 1 : (o4 > 255 ? 255 : o4);
+
+                return FoodWords.GenerateWordCode((byte)o2, (byte)o3, (byte)o4);
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
         private async Task SendFileAsync()
         {
             var dialog = new OpenFileDialog
@@ -304,12 +334,21 @@ namespace BubbleNet.ViewModels
             };
 
             NotificationMessage = $"📤 Sending text...";
-            var success = await _networkService.SendTransferAsync(TargetWordCode, item);
-            if (success)
+            if (ConvertToWordCode(TargetWordCode) == _networkService.GetWordCode())
             {
-                NotificationMessage = $"✅ Sent text to {TargetWordCode}";
-                TextToSend = "";
-                _soundService.PlaySend();
+                NotificationMessage = "⚠️ Please don't send text to yourself. It bugs out.";
+                _soundService.PlayError();
+                return;
+            }
+            else
+            {
+                var success = await _networkService.SendTransferAsync(TargetWordCode, item);
+                if (success)
+                {
+                    NotificationMessage = $"✅ Sent text to {TargetWordCode}";
+                    TextToSend = "";
+                    _soundService.PlaySend();
+                }
             }
         }
 
