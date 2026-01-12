@@ -1,0 +1,87 @@
+<Window x:Class="BubbleNet.Views.StreamShareWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Stream Share Active" 
+        Height="300" Width="350"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Topmost="True"
+        Background="{StaticResource PrimaryBackgroundBrush}">
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,15">
+            <TextBlock Text="📺" FontSize="40" HorizontalAlignment="Center"/>
+            <TextBlock Text="Streaming Active" FontSize="20" FontWeight="Bold" 
+                       Foreground="{StaticResource PrimaryTextBrush}" 
+                       HorizontalAlignment="Center" Margin="0,10,0,0"/>
+        </StackPanel>
+
+        <!-- Stream Stats -->
+        <Border Grid.Row="1" Background="{StaticResource SecondaryBackgroundBrush}" 
+                CornerRadius="8" Padding="15">
+            <StackPanel>
+                <!-- Stream ID -->
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Stream ID" FontSize="12" 
+                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                    <TextBlock x:Name="StreamIdText" Grid.Column="1" FontSize="12" 
+                               Foreground="{StaticResource AccentBrush}" FontWeight="SemiBold"/>
+                </Grid>
+
+                <!-- Target -->
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Streaming to" FontSize="12" 
+                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                    <TextBlock x:Name="TargetText" Grid.Column="1" FontSize="12" 
+                               Foreground="{StaticResource PrimaryTextBrush}" FontWeight="SemiBold"/>
+                </Grid>
+
+                <!-- Images Sent -->
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Images Sent" FontSize="12" 
+                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                    <TextBlock x:Name="ImageCountText" Grid.Column="1" FontSize="18" 
+                               Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                </Grid>
+
+                <!-- Duration -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Duration" FontSize="12" 
+                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                    <TextBlock x:Name="DurationText" Grid.Column="1" FontSize="18" 
+                               Foreground="{StaticResource PrimaryTextBrush}" FontWeight="Bold"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Stop Button -->
+        <Button Grid.Row="2" Content="⏹️ Stop Streaming" 
+                Style="{StaticResource PrimaryButton}" 
+                Background="{StaticResource ErrorBrush}"
+                Click="StopStream_Click" 
+                HorizontalAlignment="Stretch" Margin="0,15,0,0"/>
+    </Grid>
+</Window>

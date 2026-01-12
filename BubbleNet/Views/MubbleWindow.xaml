@@ -1,0 +1,105 @@
+<Window x:Class="BubbleNet.Views.MubbleWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Mubble - Muddled Bubble Encryption" 
+        Height="450" Width="450"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{StaticResource PrimaryBackgroundBrush}">
+    
+    <Grid Margin="25">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,20">
+            <TextBlock Text="🔐" FontSize="48" HorizontalAlignment="Center"/>
+            <TextBlock Text="Mubble" FontSize="28" FontWeight="Bold" 
+                       Foreground="{StaticResource PrimaryTextBrush}" 
+                       HorizontalAlignment="Center" Margin="0,10,0,5"/>
+            <TextBlock Text="Muddled Bubble Encryption" FontSize="14" 
+                       Foreground="{StaticResource AccentBrush}" 
+                       HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Content -->
+        <StackPanel Grid.Row="1">
+            <!-- Explanation -->
+            <Border Background="{StaticResource SecondaryBackgroundBrush}" 
+                    CornerRadius="8" Padding="15" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="How Mubble Works" FontSize="14" FontWeight="SemiBold" 
+                               Foreground="{StaticResource PrimaryTextBrush}" Margin="0,0,0,10"/>
+                    <TextBlock TextWrapping="Wrap" FontSize="12" 
+                               Foreground="{StaticResource SecondaryTextBrush}" LineHeight="20">
+                        <Run Text="1. Set a shared code with your recipient"/>
+                        <LineBreak/>
+                        <Run Text="2. Enable Mubble encryption"/>
+                        <LineBreak/>
+                        <Run Text="3. Your payloads are encrypted using the code"/>
+                        <LineBreak/>
+                        <Run Text="4. The code is sent in plaintext for matching"/>
+                        <LineBreak/>
+                        <Run Text="5. Receiver with matching code can decrypt"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!-- Current Status -->
+            <Border Background="{StaticResource TertiaryBackgroundBrush}" 
+                    CornerRadius="8" Padding="15" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Current Status" FontSize="12" 
+                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <TextBlock x:Name="StatusText" FontSize="16" FontWeight="SemiBold" 
+                                   Foreground="{StaticResource PrimaryTextBrush}" Margin="0,5,0,0"/>
+                    </StackPanel>
+                    
+                    <ToggleButton Grid.Column="1" Style="{StaticResource ToggleSwitch}" 
+                                  x:Name="MubbleEnabledToggle"
+                                  IsChecked="{Binding MubbleEnabled}" 
+                                  VerticalAlignment="Center"
+                                  Checked="MubbleToggle_Changed" 
+                                  Unchecked="MubbleToggle_Changed"/>
+                </Grid>
+            </Border>
+
+            <!-- Code Entry -->
+            <StackPanel>
+                <TextBlock Text="Mubble Code" FontSize="13" 
+                           Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,8"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBox x:Name="MubbleCodeBox" Grid.Column="0" 
+                             Style="{StaticResource DarkTextBox}"
+                             Text="{Binding MubbleCode, UpdateSourceTrigger=PropertyChanged}"
+                             FontSize="16" FontWeight="SemiBold"/>
+                    <Button Grid.Column="1" Content="📋" 
+                            Style="{StaticResource SecondaryButton}"
+                            Click="CopyCode_Click" Margin="10,0,0,0"
+                            ToolTip="Copy code to clipboard"/>
+                </Grid>
+                <TextBlock Text="Share this code securely with your recipient" 
+                           FontSize="11" Foreground="{StaticResource SecondaryTextBrush}" 
+                           Margin="0,8,0,0" FontStyle="Italic"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Footer -->
+        <Button Grid.Row="2" Content="Done" Style="{StaticResource PrimaryButton}" 
+                Click="Done_Click" HorizontalAlignment="Center" Padding="40,12"/>
+    </Grid>
+</Window>
