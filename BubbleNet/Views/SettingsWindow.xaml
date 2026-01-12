@@ -1,0 +1,217 @@
+<Window x:Class="BubbleNet.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="BubbleNet Settings" 
+        Height="600" Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{StaticResource PrimaryBackgroundBrush}">
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="⚙️ Settings" FontSize="24" FontWeight="Bold" 
+                       Foreground="{StaticResource PrimaryTextBrush}"/>
+            <TextBlock Text="Configure BubbleNet preferences" 
+                       FontSize="13" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <!-- Settings Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                
+                <!-- Mubble Section -->
+                <Border Background="{StaticResource SecondaryBackgroundBrush}" 
+                        CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBlock Text="🔐 Mubble Encryption" FontSize="16" FontWeight="SemiBold" 
+                                       Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                            <Button Content="Open Mubble" Style="{StaticResource SecondaryButton}" 
+                                    Click="OpenMubble_Click" Margin="15,0,0,0" Padding="10,5"/>
+                        </StackPanel>
+                        <TextBlock Text="'Muddled Bubble' - Encrypt payloads with a shared code" 
+                                   FontSize="12" Foreground="{StaticResource SecondaryTextBrush}" 
+                                   Margin="0,0,0,15" TextWrapping="Wrap"/>
+                        
+                        <!-- Mubble Toggle -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <ToggleButton x:Name="MubbleToggle" Style="{StaticResource ToggleSwitch}" 
+                                          IsChecked="{Binding MubbleEnabled}" Margin="0,0,10,0"/>
+                            <TextBlock Text="Enable Mubble Encryption" FontSize="13" 
+                                       Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        
+                        <!-- Mubble Code -->
+                        <TextBlock Text="Mubble Code" FontSize="12" 
+                                   Foreground="{StaticResource SecondaryTextBrush}" Margin="0,5,0,5"/>
+                        <TextBox x:Name="MubbleCodeBox" Style="{StaticResource DarkTextBox}" 
+                                 Text="{Binding MubbleCode, UpdateSourceTrigger=PropertyChanged}"
+                                 IsEnabled="{Binding MubbleEnabled}"/>
+                        <TextBlock Text="Both sender and receiver must use the same code" 
+                                   FontSize="11" Foreground="{StaticResource SecondaryTextBrush}" 
+                                   Margin="0,5,0,0" FontStyle="Italic"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- StreamShare Section -->
+                <Border Background="{StaticResource SecondaryBackgroundBrush}" 
+                        CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="📺 Stream Share" FontSize="16" FontWeight="SemiBold" 
+                                   Foreground="{StaticResource PrimaryTextBrush}" Margin="0,0,0,5"/>
+                        <TextBlock Text="Configure screen streaming settings" 
+                                   FontSize="12" Foreground="{StaticResource SecondaryTextBrush}" 
+                                   Margin="0,0,0,15"/>
+                        
+                        <!-- Stream Interval -->
+                        <TextBlock Text="Capture Interval (seconds)" FontSize="12" 
+                                   Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider x:Name="StreamIntervalSlider" Grid.Column="0" 
+                                    Minimum="0.25" Maximum="10" 
+                                    Value="{Binding StreamShareInterval}"
+                                    TickFrequency="0.25" IsSnapToTickEnabled="True"
+                                    VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" 
+                                       Text="{Binding StreamShareInterval, StringFormat={}{0:0.##}s}"
+                                       Foreground="{StaticResource PrimaryTextBrush}" 
+                                       VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <TextBlock Text="Lower intervals = smoother stream, higher bandwidth usage" 
+                                   FontSize="11" Foreground="{StaticResource SecondaryTextBrush}" 
+                                   Margin="0,5,0,0" FontStyle="Italic"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- FileBubble Section -->
+                <Border Background="{StaticResource SecondaryBackgroundBrush}" 
+                        CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="📦 FileBubble" FontSize="16" FontWeight="SemiBold" 
+                                   Foreground="{StaticResource PrimaryTextBrush}" Margin="0,0,0,5"/>
+                        <TextBlock Text="Automatic file collection from senders" 
+                                   FontSize="12" Foreground="{StaticResource SecondaryTextBrush}" 
+                                   Margin="0,0,0,15"/>
+                        
+                        <!-- FileBubble Toggle -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <ToggleButton x:Name="FileBubbleToggle" Style="{StaticResource ToggleSwitch}" 
+                                          IsChecked="{Binding FileBubbleEnabled}" Margin="0,0,10,0"/>
+                            <TextBlock Text="Enable FileBubble Collection" FontSize="13" 
+                                       Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        
+                        <!-- Download Path -->
+                        <TextBlock Text="Download Path" FontSize="12" 
+                                   Foreground="{StaticResource SecondaryTextBrush}" Margin="0,5,0,5"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Style="{StaticResource DarkTextBox}" 
+                                     Text="{Binding FileBubbleDownloadPath, UpdateSourceTrigger=PropertyChanged}"
+                                     IsReadOnly="True"/>
+                            <Button Grid.Column="1" Content="Browse" Style="{StaticResource SecondaryButton}" 
+                                    Click="BrowseFileBubblePath_Click" Margin="10,0,0,0"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Screenshot Section -->
+                <Border Background="{StaticResource SecondaryBackgroundBrush}" 
+                        CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="📸 Screenshots" FontSize="16" FontWeight="SemiBold" 
+                                   Foreground="{StaticResource PrimaryTextBrush}" Margin="0,0,0,5"/>
+                        <TextBlock Text="Configure screenshot capture settings" 
+                                   FontSize="12" Foreground="{StaticResource SecondaryTextBrush}" 
+                                   Margin="0,0,0,15"/>
+                        
+                        <!-- Save Screenshots Toggle -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <ToggleButton Style="{StaticResource ToggleSwitch}" 
+                                          IsChecked="{Binding SaveScreenshotsLocally}" Margin="0,0,10,0"/>
+                            <TextBlock Text="Save screenshots locally as PNG" FontSize="13" 
+                                       Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        
+                        <!-- Screenshot Save Path -->
+                        <TextBlock Text="Save Path" FontSize="12" 
+                                   Foreground="{StaticResource SecondaryTextBrush}" Margin="0,5,0,5"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Style="{StaticResource DarkTextBox}" 
+                                     Text="{Binding ScreenshotSavePath, UpdateSourceTrigger=PropertyChanged}"
+                                     IsReadOnly="True"/>
+                            <Button Grid.Column="1" Content="Browse" Style="{StaticResource SecondaryButton}" 
+                                    Click="BrowseScreenshotPath_Click" Margin="10,0,0,0"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sound Section -->
+                <Border Background="{StaticResource SecondaryBackgroundBrush}" 
+                        CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="🔊 Sound" FontSize="16" FontWeight="SemiBold" 
+                                   Foreground="{StaticResource PrimaryTextBrush}" Margin="0,0,0,5"/>
+                        
+                        <!-- Sound Toggle -->
+                        <StackPanel Orientation="Horizontal">
+                            <ToggleButton Style="{StaticResource ToggleSwitch}" 
+                                          IsChecked="{Binding SoundEnabled}" Margin="0,0,10,0"/>
+                            <TextBlock Text="Enable Sound Effects" FontSize="13" 
+                                       Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- DoubleBubble Section -->
+                <Border Background="{StaticResource SecondaryBackgroundBrush}" 
+                        CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="🫧🫧 DoubleBubble" FontSize="16" FontWeight="SemiBold" 
+                                   Foreground="{StaticResource PrimaryTextBrush}" Margin="0,0,0,5"/>
+                        <TextBlock Text="Send to multiple recipients at once" 
+                                   FontSize="12" Foreground="{StaticResource SecondaryTextBrush}" 
+                                   Margin="0,0,0,15"/>
+                        
+                        <!-- Saved Targets -->
+                        <TextBlock Text="Saved Recipients (comma-separated word codes)" FontSize="12" 
+                                   Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                        <TextBox Style="{StaticResource DarkTextBox}" 
+                                 Text="{Binding DoubleBubbleTargets, UpdateSourceTrigger=PropertyChanged}"
+                                 TextWrapping="Wrap" Height="60"/>
+                        <TextBlock Text="Example: Apple/Banana/Cherry, Date/Egg/Fig" 
+                                   FontSize="11" Foreground="{StaticResource SecondaryTextBrush}" 
+                                   Margin="0,5,0,0" FontStyle="Italic"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+            <Button Content="Save" Style="{StaticResource PrimaryButton}" 
+                    Click="Save_Click" Padding="30,10"/>
+            <Button Content="Cancel" Style="{StaticResource SecondaryButton}" 
+                    Click="Cancel_Click" Margin="10,0,0,0" Padding="20,10"/>
+        </StackPanel>
+    </Grid>
+</Window>
