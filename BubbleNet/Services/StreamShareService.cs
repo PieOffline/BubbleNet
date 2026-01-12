@@ -72,8 +72,9 @@ namespace BubbleNet.Services
             // Stop any existing stream
             await StopStreamAsync();
 
-            // Generate unique stream ID
-            _currentStreamId = Guid.NewGuid().ToString("N")[..8].ToUpper();
+            // Generate unique stream ID using full GUID for better uniqueness
+            // Using 16 characters (half of GUID) provides ~2^64 combinations
+            _currentStreamId = Guid.NewGuid().ToString("N")[..16].ToUpper();
             _streamingCts = new CancellationTokenSource();
 
             IsStreaming = true;

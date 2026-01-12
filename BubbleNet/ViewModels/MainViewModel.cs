@@ -1008,9 +1008,23 @@ namespace BubbleNet.ViewModels
 
             if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                var count = _fileBubbleService.DownloadSessionFiles(session.SessionId, dialog.SelectedPath);
-                NotificationMessage = $"✅ Downloaded {count} files to {dialog.SelectedPath}";
-                _soundService.PlayClick();
+                try
+                {
+                    var count = _fileBubbleService.DownloadSessionFiles(session.SessionId, dialog.SelectedPath);
+                    NotificationMessage = $"✅ Downloaded {count} files to {dialog.SelectedPath}";
+                    _soundService.PlayClick();
+                }
+                catch (IOException ex)
+                {
+                    // Some files failed to download
+                    NotificationMessage = $"⚠️ {ex.Message}";
+                    _soundService.PlayError();
+                }
+                catch (Exception ex)
+                {
+                    NotificationMessage = $"⚠️ Download failed: {ex.Message}";
+                    _soundService.PlayError();
+                }
             }
         }
 
@@ -1095,10 +1109,10 @@ namespace BubbleNet.ViewModels
                 int o3 = parsed.octet3 > 0 ? parsed.octet3 : local.octet3;
                 int o4 = parsed.octet4 > 0 ? parsed.octet4 : local.octet4;
 
-                // Clamp values to valid range
-                o2 = Math.Clamp(o2, 1, 255);
-                o3 = Math.Clamp(o3, 1, 255);
-                o4 = Math.Clamp(o4, 1, 255);
+                // Clamp values to valid IP octet range (1-255) using ternary for compatibility
+                o2 = o2 < 1 ? 1 : (o2 > 255 ? 255 : o2);
+                o3 = o3 < 1 ? 1 : (o3 > 255 ? 255 : o3);
+                o4 = o4 < 1 ? 1 : (o4 > 255 ? 255 : o4);
 
                 return FoodWords.GenerateWordCode((byte)o2, (byte)o3, (byte)o4);
             }

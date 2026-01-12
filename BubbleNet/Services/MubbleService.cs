@@ -6,32 +6,43 @@ using System.Text;
 namespace BubbleNet.Services
 {
     /// <summary>
-    /// Mubble encryption service - "Muddled Bubble" encryption for secure payload transfer.
-    /// Provides XOR-based encryption using a user-defined code for simple but effective
-    /// scrambling of payload data across the local network.
+    /// Mubble encryption service - "Muddled Bubble" encryption for payload privacy.
+    /// Provides XOR-based encryption using a user-defined code for simple scrambling
+    /// of payload data across the local network.
     /// 
-    /// Note: This is NOT cryptographically secure encryption - it's designed for
-    /// privacy on trusted local networks, not for securing sensitive data.
+    /// SECURITY DISCLAIMER:
+    /// This is NOT cryptographically secure encryption. Mubble uses XOR with key derivation,
+    /// which provides privacy/obfuscation but is vulnerable to frequency analysis and other
+    /// attacks. It is designed ONLY for privacy on trusted local networks where the goal is
+    /// to prevent casual viewing of transferred data, NOT for protecting sensitive information.
+    /// 
+    /// For truly sensitive data, use proper encryption libraries like AES with authenticated encryption.
     /// </summary>
     public static class MubbleService
     {
         /// <summary>
         /// Encrypts data using the Mubble code.
-        /// Uses XOR encryption with key derivation for simple scrambling.
+        /// Uses XOR encryption with SHA256 key derivation for simple scrambling.
         /// </summary>
         /// <param name="data">The data to encrypt</param>
-        /// <param name="code">The Mubble code (password)</param>
-        /// <returns>Encrypted data bytes</returns>
+        /// <param name="code">The Mubble code (password). If empty, returns original data unchanged.</param>
+        /// <returns>Encrypted data bytes, or original data if code is empty/null</returns>
+        /// <remarks>
+        /// Returns original data without modification when code is empty. This is intentional
+        /// to allow the caller to control when encryption is applied (e.g., when Mubble is disabled).
+        /// Callers should check if Mubble is enabled before calling if they expect encryption.
+        /// </remarks>
         public static byte[] Encrypt(byte[] data, string code)
         {
-            // Return original data if no code provided
+            // Return original data if no code provided - this is intentional for disabled Mubble
             if (string.IsNullOrEmpty(code) || data == null || data.Length == 0)
                 return data ?? Array.Empty<byte>();
 
-            // Generate a key from the code
+            // Generate a key from the code using SHA256
             byte[] key = DeriveKey(code, data.Length);
 
             // XOR each byte with the corresponding key byte
+            // Note: This provides obfuscation, not cryptographic security
             byte[] result = new byte[data.Length];
             for (int i = 0; i < data.Length; i++)
             {

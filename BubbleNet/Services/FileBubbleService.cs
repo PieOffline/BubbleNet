@@ -172,6 +172,8 @@ namespace BubbleNet.Services
             }
 
             int savedCount = 0;
+            var errors = new System.Collections.Generic.List<string>();
+
             foreach (var file in session.Files)
             {
                 if (file.FileData != null && !string.IsNullOrEmpty(file.FileName))
@@ -188,9 +190,23 @@ namespace BubbleNet.Services
                         filePath = Path.Combine(targetDirectory, $"{nameWithoutExt}_{counter++}{ext}");
                     }
 
-                    File.WriteAllBytes(filePath, file.FileData);
-                    savedCount++;
+                    try
+                    {
+                        File.WriteAllBytes(filePath, file.FileData);
+                        savedCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Track failed files but continue with others
+                        errors.Add($"{file.FileName}: {ex.Message}");
+                    }
                 }
+            }
+
+            // If there were errors, throw an aggregate exception with details
+            if (errors.Count > 0 && savedCount < session.Files.Count)
+            {
+                throw new IOException($"Failed to save {errors.Count} file(s): {string.Join("; ", errors)}");
             }
 
             return savedCount;

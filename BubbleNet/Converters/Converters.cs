@@ -213,4 +213,31 @@ namespace BubbleNet.Converters
             return Binding.DoNothing;
         }
     }
+
+    /// <summary>
+    /// Converts TransferType enum to Visibility based on parameter matching.
+    /// Shows element (Visible) when SelectedPayloadType equals parameter, hides (Collapsed) otherwise.
+    /// Used in the dynamic input field section of the Send menu.
+    /// </summary>
+    public class TransferTypeToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null || parameter == null)
+                return Visibility.Collapsed;
+
+            // Compare enum value to string parameter
+            string valueStr = value.ToString() ?? "";
+            string paramStr = parameter.ToString() ?? "";
+
+            return valueStr.Equals(paramStr, StringComparison.OrdinalIgnoreCase)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
